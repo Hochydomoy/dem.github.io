@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>New Year Crossword (English)</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #e8f4f8;
+      padding: 20px;
+      color: #222;
+    }
+    h1 {
+      text-align: center;
+      color: #c00;
+    }
+    .container {
+      display: flex;
+      gap: 30px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .crossword {
+      display: grid;
+      grid-template-columns: repeat(11, 32px);
+      grid-gap: 1px;
+      background-color: #000;
+      padding: 6px;
+      border: 2px solid #333;
+      margin: auto;
+    }
+    .cell {
+      width: 32px;
+      height: 32px;
+      background: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: bold;
+      font-size: 14px;
+      position: relative;
+      user-select: none;
+    }
+    .cell.black {
+      background: #000;
+    }
+    .cell.number::before {
+      content: attr(data-number);
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      font-size: 9px;
+      color: #000;
+    }
+    .questions {
+      max-width: 500px;
+    }
+    .questions h2 {
+      color: #0055aa;
+      margin-top: 20px;
+    }
+    .questions ul {
+      padding-left: 20px;
+    }
+    .questions li {
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎄 New Year Crossword (English) 🎁</h1>
+
+  <div class="container">
+    <div class="crossword" id="grid">
+      <!-- Grid filled by JS -->
+    </div>
+
+    <div class="questions">
+      <h2>Across:</h2>
+      <ul>
+        <li><strong>1.</strong> A period of 365 days (4)</li>
+        <li><strong>4.</strong> White flakes that fall in winter (4)</li>
+        <li><strong>5.</strong> Headwear for cold weather (3)</li>
+        <li><strong>7.</strong> Santa's magical animals (8)</li>
+        <li><strong>9.</strong> Large house in the countryside (5)</li>
+        <li><strong>10.</strong> Party item that makes a loud snap and gives small gifts (7)</li>
+        <li><strong>11.</strong> The granddaughter of Ded Moroz (10)</li>
+      </ul>
+
+      <h2>Down:</h2>
+      <ul>
+        <li><strong>1.</strong> Ice crystals on windows in winter (5)</li>
+        <li><strong>2.</strong> Warm glove with one compartment for all fingers (6)</li>
+        <li><strong>3.</strong> Sound of big bells at midnight on New Year’s Eve (6)</li>
+        <li><strong>6.</strong> Cover for your head in winter (3)</li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    // 11x11 grid (rows x cols)
+    // Words:
+    // Across:
+    // 1. YEAR (0,0 → 0,3)
+    // 4. SNOW (1,1 → 1,4)
+    // 5. HAT (0,6 → 0,8)
+    // 7. REINDEER (3,0 → 3,7)
+    // 9. MANOR (5,3 → 5,7)
+    // 10. CRACKER (7,1 → 7,7)
+    // 11. SNOWMAIDEN (9,0 → 9,9)
+
+    // Down:
+    // 1. FROST (0,0 → 4,0)
+    // 2. MITTEN (1,2 → 6,2)
+    // 3. CHIMES (1,4 → 6,4)
+    // 6. HAT (0,6 → 2,6) — already used across
+
+    const grid = Array(11).fill(null).map(() => Array(11).fill(''));
+
+    // Fill words
+    // YEAR
+    ['Y','E','A','R'].forEach((c,i) => grid[0][i] = c);
+    // FROST (down from 0,0)
+    ['F','R','O','S','T'].forEach((c,i) => grid[i][0] = c);
+    // SNOW
+    ['S','N','O','W'].forEach((c,i) => grid[1][i+1] = c);
+    // MITTEN (down col 2, rows 1-6)
+    ['M','I','T','T','E','N'].forEach((c,i) => grid[i+1][2] = c);
+    // CHIMES (down col 4, rows 1-6)
+    ['C','H','I','M','E','S'].forEach((c,i) => grid[i+1][4] = c);
+    // HAT (across row 0, cols 6-8)
+    ['H','A','T'].forEach((c,i) => grid[0][i+6] = c);
+    // HAT down (already covered by above)
+    // REINDEER
+    ['R','E','I','N','D','E','E','R'].forEach((c,i) => grid[3][i] = c);
+    // MANOR
+    ['M','A','N','O','R'].forEach((c,i) => grid[5][i+3] = c);
+    // CRACKER
+    ['C','R','A','C','K','E','R'].forEach((c,i) => grid[7][i+1] = c);
+    // SNOWMAIDEN
+    ['S','N','O','W','M','A','I','D','E','N'].forEach((c,i) => grid[9][i] = c);
+
+    // Set black cells (empty string = black)
+    // We'll mark unused cells as black manually by leaving them empty
+    // But for realism, we'll define which are black
+    const allCells = Array(11).fill().map(() => Array(11).fill(true));
+    // Mark used cells
+    const used = Array(11).fill().map(() => Array(11).fill(false));
+    for (let r = 0; r < 11; r++)
+      for (let c = 0; c < 11; c++)
+        if (grid[r][c] !== '') used[r][c] = true;
+
+    // Number mapping (row-col -> number)
+    const numbers = {
+      '0-0': 1,   // YEAR & FROST
+      '1-1': 4,   // SNOW
+      '0-6': 5,   // HAT
+      '3-0': 7,   // REINDEER
+      '5-3': 9,   // MANOR
+      '7-1': 10,  // CRACKER
+      '9-0': 11,  // SNOWMAIDEN
+      '1-2': 2,   // MITTEN (down)
+      '1-4': 3,   // CHIMES (down)
+      // '0-6': 6 is same as 5, so we keep 5 across and note 6 down in clues
+    };
+
+    const crosswordGrid = document.getElementById('grid');
+
+    for (let r = 0; r < 11; r++) {
+      for (let c = 0; c < 11; c++) {
+        const cell = document.createElement('div');
+        const key = `${r}-${c}`;
+        if (used[r][c]) {
+          cell.className = 'cell';
+          cell.textContent = grid[r][c];
+          if (numbers[key]) {
+            cell.classList.add('number');
+            cell.dataset.number = numbers[key];
+          }
+        } else {
+          cell.className = 'cell black';
+        }
+        crosswordGrid.appendChild(cell);
+      }
+    }
+  </script>
+</body>
+</html>
